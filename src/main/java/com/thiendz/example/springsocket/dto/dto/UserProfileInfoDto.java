@@ -1,23 +1,16 @@
-package com.thiendz.example.springsocket.model;
+package com.thiendz.example.springsocket.dto.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import javax.persistence.*;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@Entity
-@Table(indexes = @Index(columnList = "username"))
-public class UserProfile {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class UserProfileInfoDto {
     private Long id;
-
     String username;
     String password;
     String role;
@@ -25,4 +18,6 @@ public class UserProfile {
     Long createAt;
     Long updateAt;
     Long deleteAt;
+    int gold;
+    int sliver;
 }

@@ -12,17 +12,12 @@ import javax.persistence.*;
 @AllArgsConstructor
 @ToString
 @Entity
-@Table(indexes = @Index(columnList = "username"))
-public class UserProfile {
+@Table(indexes = @Index(columnList = "userId"))
+public class UserWallet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    String username;
-    String password;
-    String role;
-    boolean status;
-    Long createAt;
-    Long updateAt;
-    Long deleteAt;
+    Long id;
+    Long userId;
+    int gold;
+    int sliver;
 }
