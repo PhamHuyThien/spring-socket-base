@@ -33,10 +33,12 @@ public class WsPortalApplication {
 
     @OnClose
     public void onClose(Session session) {
+        sessions.remove(session);
     }
 
     @OnError
     public void onError(Session session, Throwable throwable) {
+        sessions.remove(session);
         throwable.printStackTrace();
     }
 }
