@@ -1,7 +1,6 @@
 package com.thiendz.example.springsocket.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thiendz.example.springsocket.configs.SpringContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +10,7 @@ import java.util.Map;
 public class SqlUtils {
 
     public static <T> T map(String nativeSql, Object[] objects, Class<T> clazz) throws Exception {
-        ObjectMapper objectMapper = SpringContext.getApplicationContext().getBean(ObjectMapper.class);
+        ObjectMapper objectMapper = BeanUtil.getApplicationContext().getBean(ObjectMapper.class);
         List<String> nameList = sqlToSelectName(nativeSql);
         if (nameList.size() != objects.length)
             throw new Exception("name list <> object length");
@@ -23,7 +22,7 @@ public class SqlUtils {
     }
 
     public static <T> List<T> map(String nativeSql, List<Object[]> objects, Class<T> clazz) throws Exception {
-        ObjectMapper objectMapper = SpringContext.getApplicationContext().getBean(ObjectMapper.class);
+        ObjectMapper objectMapper = BeanUtil.getApplicationContext().getBean(ObjectMapper.class);
         List<String> nameList = sqlToSelectName(nativeSql);
         List<T> listObjectMapper = new ArrayList<>();
         if (nameList.size() != objects.get(0).length)

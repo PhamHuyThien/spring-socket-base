@@ -3,7 +3,6 @@ package com.thiendz.example.springsocket.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thiendz.example.springsocket.auths.JwtTokenProvider;
-import com.thiendz.example.springsocket.configs.SpringContext;
 import com.thiendz.example.springsocket.dto.enums.WsCommand;
 import com.thiendz.example.springsocket.dto.ws.UserSession;
 import com.thiendz.example.springsocket.dto.ws.WsMessage;
@@ -17,7 +16,7 @@ import java.util.Optional;
 public class WsUtils {
     public static <T> UserSession<T> onConnectParser(Session session) {
         Map<String, String> queryParams = URLUtil.parseQueryParam(session.getQueryString());
-        JwtTokenProvider jwtTokenProvider = SpringContext.getApplicationContext().getBean(JwtTokenProvider.class);
+        JwtTokenProvider jwtTokenProvider = BeanUtil.getApplicationContext().getBean(JwtTokenProvider.class);
         String token = queryParams.get("token");
         UserProfile userProfile;
         try {
@@ -31,7 +30,7 @@ public class WsUtils {
     }
 
     public static WsMessage<?> onMessageParser(String message) {
-        ObjectMapper objectMapper = SpringContext.getApplicationContext().getBean(ObjectMapper.class);
+        ObjectMapper objectMapper = BeanUtil.getApplicationContext().getBean(ObjectMapper.class);
         WsMessage<?> wsMessage = WsMessage.error(WsCommand.ERROR_COMMAND, -5, "Lỗi cú pháp", message);
         try {
             wsMessage = objectMapper.readValue(message, WsMessage.class);

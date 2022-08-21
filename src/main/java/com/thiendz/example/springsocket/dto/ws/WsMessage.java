@@ -1,7 +1,7 @@
 package com.thiendz.example.springsocket.dto.ws;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thiendz.example.springsocket.configs.SpringContext;
+import com.thiendz.example.springsocket.utils.BeanUtil;
 import com.thiendz.example.springsocket.dto.enums.WsCommand;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,7 +35,7 @@ public class WsMessage<T> {
         return new WsMessage<T>(cmd, false, code, message, data);
     }
     public String toStringJson() {
-        ObjectMapper objectMapper = SpringContext.getApplicationContext().getBean(ObjectMapper.class);
+        ObjectMapper objectMapper = BeanUtil.getApplicationContext().getBean(ObjectMapper.class);
         String json = null;
         try {
             json = objectMapper.writeValueAsString(this);
