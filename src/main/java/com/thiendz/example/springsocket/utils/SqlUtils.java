@@ -12,8 +12,6 @@ public class SqlUtils {
     public static <T> T map(String nativeSql, Object[] objects, Class<T> clazz) throws Exception {
         ObjectMapper objectMapper = BeanUtil.getApplicationContext().getBean(ObjectMapper.class);
         List<String> nameList = sqlToSelectName(nativeSql);
-        if (nameList.size() != objects.length)
-            throw new Exception("name list <> object length");
         Map<String, Object> map = new HashMap<>();
         for (int i = 0; i < objects.length; i++)
             map.put(nameList.get(i), objects[i]);
@@ -21,13 +19,12 @@ public class SqlUtils {
         return objectMapper.readValue(json, clazz);
     }
 
-    public static <T> List<T> map(String nativeSql, List<Object[]> objects, Class<T> clazz) throws Exception {
+    public static <T> List<T> map(String nativeSql, List<?> objects, Class<T> clazz) throws Exception {
         ObjectMapper objectMapper = BeanUtil.getApplicationContext().getBean(ObjectMapper.class);
         List<String> nameList = sqlToSelectName(nativeSql);
         List<T> listObjectMapper = new ArrayList<>();
-        if (nameList.size() != objects.get(0).length)
-            throw new Exception("name list <> object length");
-        for (Object[] objs : objects) {
+        for (Object object : objects) {
+            Object[] objs = (Object[]) object;
             Map<String, Object> map = new HashMap<>();
             for (int j = 0; j < objs.length; j++)
                 map.put(nameList.get(j), objs[j]);
