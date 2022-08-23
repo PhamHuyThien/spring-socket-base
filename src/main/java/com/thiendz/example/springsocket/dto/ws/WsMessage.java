@@ -1,6 +1,7 @@
 package com.thiendz.example.springsocket.dto.ws;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thiendz.example.springsocket.dto.ws.req.CreateRoomReq;
 import com.thiendz.example.springsocket.utils.BeanUtil;
 import com.thiendz.example.springsocket.dto.enums.WsCommand;
 import lombok.AllArgsConstructor;
@@ -22,18 +23,23 @@ public class WsMessage<T> {
     public static WsMessage<Void> error(WsCommand cmd, int code, String message) {
         return new WsMessage<>(cmd, true, code, message, null);
     }
+
     public static <T> WsMessage<T> error(WsCommand cmd, int code, String message, Class<T> clazz) {
         return new WsMessage<>(cmd, true, code, message, null);
     }
+
     public static <T> WsMessage<T> error(WsCommand cmd, int code, String message, T data) {
         return new WsMessage<>(cmd, true, code, message, data);
     }
+
     public static <T> WsMessage<T> success(WsCommand cmd, int code, String message) {
         return new WsMessage<T>(cmd, false, code, message, null);
     }
+
     public static <T> WsMessage<T> success(WsCommand cmd, int code, String message, T data) {
         return new WsMessage<T>(cmd, false, code, message, data);
     }
+
     public String toStringJson() {
         ObjectMapper objectMapper = BeanUtil.getApplicationContext().getBean(ObjectMapper.class);
         String json = null;
@@ -42,5 +48,14 @@ public class WsMessage<T> {
         } catch (Exception ignored) {
         }
         return json;
+    }
+
+    public <D> D cashData(Class<D> clazz) {
+        ObjectMapper objectMapper = BeanUtil.getApplicationContext().getBean(ObjectMapper.class);
+        try{
+            return objectMapper.convertValue(this.data, clazz);
+        }catch (Exception ignored){
+        }
+        return null;
     }
 }

@@ -9,5 +9,8 @@ public enum WsCommand {
     //ERROR
     ERROR_COMMAND,
     //NOT_FOUND
-    NOT_FOUND_COMMAND
+    NOT_FOUND_COMMAND,
+
+    //CHAT
+    CHAT_CREATE_ROOM,
 }

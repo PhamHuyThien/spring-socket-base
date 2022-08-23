@@ -19,10 +19,12 @@ public class WsChatApplication {
     @OnOpen
     public void onOpen(Session session) {
         UserSession<ChatSession> userSession = WsUtils.onConnectParser(session);
-        if (userSession == null)
+        if (userSession == null) {
             WsUtils.sendMessage(session, WsMessage.error(WsCommand.AUTH_LOGIN, -10, "Token sai hoặc hết hạn"));
+            WsUtils.closeSession(session);
+            return;
+        }
         WsChatApplication.sessions.put(session, userSession);
-        assert userSession != null;
         WsUtils.sendMessage(session, WsMessage.success(WsCommand.AUTH_LOGIN, 1, "đăng nhập thành công", userSession.getUserProfile()));
     }
 

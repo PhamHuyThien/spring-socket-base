@@ -57,7 +57,7 @@ public class WsUtils {
         });
     }
 
-    public static Session findSessionByUsername(Map<Session, UserSession<?>> sessions, String username){
+    public static Session findSessionByUsername(Map<Session, UserSession<?>> sessions, String username) {
         Optional<Session> sessionOptional = sessions
                 .keySet()
                 .stream()
@@ -65,4 +65,13 @@ public class WsUtils {
                 .findAny();
         return sessionOptional.orElse(null);
     }
+
+    public static void closeSession(Session session) {
+        try {
+            session.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
