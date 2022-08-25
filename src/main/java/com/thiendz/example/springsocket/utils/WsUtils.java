@@ -10,8 +10,10 @@ import com.thiendz.example.springsocket.model.UserProfile;
 
 import javax.websocket.Session;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class WsUtils {
     public static <T> UserSession<T> onConnectParser(Session session) {
@@ -26,6 +28,7 @@ public class WsUtils {
         }
         UserSession<T> userSession = new UserSession<>();
         userSession.setUserProfile(userProfile);
+        userSession.setSession(session);
         return userSession;
     }
 
@@ -48,14 +51,14 @@ public class WsUtils {
     }
 
     public static void sendMessage(Map<Session, ?> to, WsMessage<?> message) {
-        to.forEach((session, o) -> {
-            try {
-                session.getBasicRemote().sendText(message.toStringJson());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        to.forEach((session, o) -> sendMessage(session, message));
     }
+
+    public static void sendMessage(List<Session> to, WsMessage<?> message) {
+        to.forEach((session) -> sendMessage(session, message));
+    }
+
+
 
     public static Session findSessionByUsername(Map<Session, UserSession<?>> sessions, String username) {
         Optional<Session> sessionOptional = sessions

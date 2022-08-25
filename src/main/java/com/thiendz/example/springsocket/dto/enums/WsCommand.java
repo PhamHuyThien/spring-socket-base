@@ -13,4 +13,7 @@ public enum WsCommand {
 
     //CHAT
     CHAT_CREATE_ROOM,
+    CHAT_ROOM_INFO,
+    CHAT_LIST_ROOM_INFO,
+    CHAT_JOIN_ROOM,
 }

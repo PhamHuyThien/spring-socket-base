@@ -1,5 +1,6 @@
 package com.thiendz.example.springsocket.dto.ws.app;
 
+import com.thiendz.example.springsocket.dto.ws.UserSession;
 import com.thiendz.example.springsocket.model.UserProfile;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,6 @@ public class RoomInfo {
     int limit;
     String password;
     int fee;
-    UserProfile master;
-    List<UserProfile> member;
+    UserSession<?> master;
+    List<UserSession<?>> members;
 }

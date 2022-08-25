@@ -50,7 +50,7 @@ public class WsMessage<T> {
         return json;
     }
 
-    public <D> D cashData(Class<D> clazz) {
+    public <D> D dataCashTo(Class<D> clazz) {
         ObjectMapper objectMapper = BeanUtil.getApplicationContext().getBean(ObjectMapper.class);
         try{
             return objectMapper.convertValue(this.data, clazz);
