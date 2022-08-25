@@ -1,5 +1,6 @@
 package com.thiendz.example.springsocket.controllers.ws;
 
+import com.thiendz.example.springsocket.dto.LimitRequest;
 import com.thiendz.example.springsocket.dto.enums.WsCommand;
 import com.thiendz.example.springsocket.dto.ws.UserSession;
 import com.thiendz.example.springsocket.dto.ws.WsMessage;
@@ -9,6 +10,7 @@ import com.thiendz.example.springsocket.dto.ws.req.JoinRoomReq;
 import com.thiendz.example.springsocket.dto.ws.req.RoomInfoReq;
 import com.thiendz.example.springsocket.dto.ws.res.JoinRoomRes;
 import com.thiendz.example.springsocket.services.ws.chat.WsChatService;
+import com.thiendz.example.springsocket.utils.BeanUtil;
 import com.thiendz.example.springsocket.utils.WsUtils;
 import com.thiendz.example.springsocket.websocket.WsChatApplication;
 
@@ -16,7 +18,15 @@ import javax.websocket.Session;
 
 public class WsChatController {
     public static void router(Session session, WsMessage<?> message) {
+        LimitRequest limitRequest = BeanUtil.getApplicationContext().getBean(LimitRequest.class);
         UserSession<ChatSession> userSession = WsChatApplication.sessions.get(session);
+
+        WsMessage<Void> limitReqPassMessage = limitRequest.isPass(message.getCmd());
+        if (limitReqPassMessage.getCode() < 0) {
+            WsUtils.sendMessage(session, limitReqPassMessage);
+            return;
+        }
+
         switch (message.getCmd()) {
             //{"cmd": "CHAT_CREATE_ROOM", "data": {"name": "name1", "limit": 100, "password": "", "fee": 0}}
             case CHAT_CREATE_ROOM:

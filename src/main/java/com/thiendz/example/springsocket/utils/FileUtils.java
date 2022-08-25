@@ -16,4 +16,14 @@ public class FileUtils {
             data.append((char) k);
         return data.toString();
     }
+
+    public static String getLimitRequestResource(String name) throws IOException {
+        Resource resource = new ClassPathResource("/config/" + name + ".json");
+        InputStream inputStream = resource.getInputStream();
+        StringBuilder data = new StringBuilder();
+        int k;
+        while ((k = inputStream.read()) != -1)
+            data.append((char) k);
+        return data.toString();
+    }
 }

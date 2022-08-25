@@ -1,6 +1,7 @@
 package com.thiendz.example.springsocket.dto.enums;
 
 public enum WsCommand {
+    __,
     //AUTH
     AUTH_LOGIN,
     //USER_PROFILE
