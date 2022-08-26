@@ -10,7 +10,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class TimeLimit {
-    long firstTime;
     int speedBy;
     int code;
     String message;

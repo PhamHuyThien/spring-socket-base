@@ -12,7 +12,7 @@ import lombok.ToString;
 @ToString
 public class LimitRequestConfig {
     WsCommand cmd;
-    int rate;
+    double rate;
     int code;
     String message;
 }

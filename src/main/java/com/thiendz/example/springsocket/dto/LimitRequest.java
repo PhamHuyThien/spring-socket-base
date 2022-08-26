@@ -2,15 +2,18 @@ package com.thiendz.example.springsocket.dto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thiendz.example.springsocket.dto.enums.WsCommand;
+import com.thiendz.example.springsocket.dto.ws.UserSession;
 import com.thiendz.example.springsocket.dto.ws.WsMessage;
 import com.thiendz.example.springsocket.utils.BeanUtil;
 import com.thiendz.example.springsocket.utils.FileUtils;
 
+import javax.websocket.Session;
 import java.io.IOException;
 import java.util.*;
 
 public class LimitRequest {
     private final Map<WsCommand, TimeLimit> commandTimeLimit = new HashMap<>();
+    private final Map<String, Long> userLimitRequest = new HashMap<>();
 
     public LimitRequest loadConfig() {
         ObjectMapper objectMapper = BeanUtil.getApplicationContext().getBean(ObjectMapper.class);
@@ -20,8 +23,7 @@ public class LimitRequest {
             for (LimitRequestConfig limitRequestConfig : limitRequestConfigs) {
                 WsCommand wsCommand = limitRequestConfig.getCmd();
                 TimeLimit timeLimit = new TimeLimit();
-                timeLimit.setFirstTime(0);
-                timeLimit.setSpeedBy(1000 / limitRequestConfig.getRate());
+                timeLimit.setSpeedBy((int) (1000 / limitRequestConfig.getRate()));
                 timeLimit.setCode(limitRequestConfig.getCode());
                 timeLimit.setMessage(limitRequestConfig.getMessage());
                 this.commandTimeLimit.put(wsCommand, timeLimit);
@@ -32,30 +34,31 @@ public class LimitRequest {
         return this;
     }
 
-    public WsMessage<Void> isPass(WsCommand wsCommand) {
+    public WsMessage<Void> isPass(WsCommand wsCommand, String key) {
         TimeLimit timeLimit = commandTimeLimit.get(wsCommand);
         TimeLimit timeLimitAll = commandTimeLimit.get(WsCommand.__);
         TimeLimit timeLimitUsing = null;
-        WsCommand wsCommandUsing = null;
 
         WsMessage<Void> messagePassed = WsMessage.success(wsCommand, 1, "request passed");
 
-        if (timeLimit != null) {
+        if (timeLimit != null)
             timeLimitUsing = timeLimit;
-            wsCommandUsing = wsCommand;
-        } else if (timeLimitAll != null) {
+        else if (timeLimitAll != null)
             timeLimitUsing = timeLimitAll;
-            wsCommandUsing = WsCommand.__;
-        }
 
         if (timeLimitUsing == null)
             return messagePassed;
 
         long currentTime = new Date().getTime();
-        if (currentTime - timeLimitUsing.getFirstTime() < timeLimitUsing.getSpeedBy())
+
+        Long userLimitReq = userLimitRequest.get(key);
+        if (userLimitReq == null)
+            userLimitReq = 0L;
+
+        if (currentTime - userLimitReq < timeLimitUsing.getSpeedBy())
             return WsMessage.error(wsCommand, timeLimitUsing.getCode(), timeLimitUsing.getMessage(), Void.class);
 
-        commandTimeLimit.get(wsCommandUsing).setFirstTime(currentTime);
+        userLimitRequest.put(key, currentTime);
 
         return messagePassed;
     }

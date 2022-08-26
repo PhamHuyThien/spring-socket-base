@@ -21,7 +21,7 @@ public class WsChatController {
         LimitRequest limitRequest = BeanUtil.getApplicationContext().getBean(LimitRequest.class);
         UserSession<ChatSession> userSession = WsChatApplication.sessions.get(session);
 
-        WsMessage<Void> limitReqPassMessage = limitRequest.isPass(message.getCmd());
+        WsMessage<Void> limitReqPassMessage = limitRequest.isPass(message.getCmd(), session.getId());
         if (limitReqPassMessage.getCode() < 0) {
             WsUtils.sendMessage(session, limitReqPassMessage);
             return;
