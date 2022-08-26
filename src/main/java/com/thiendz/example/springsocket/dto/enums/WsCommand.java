@@ -9,6 +9,7 @@ public enum WsCommand {
 
     //ERROR
     ERROR_COMMAND,
+    ERROR_ONE_PER_USER,
     //NOT_FOUND
     NOT_FOUND_COMMAND,
 

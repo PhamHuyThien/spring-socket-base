@@ -6,6 +6,7 @@ import com.thiendz.example.springsocket.auths.JwtTokenProvider;
 import com.thiendz.example.springsocket.dto.enums.WsCommand;
 import com.thiendz.example.springsocket.dto.ws.UserSession;
 import com.thiendz.example.springsocket.dto.ws.WsMessage;
+import com.thiendz.example.springsocket.dto.ws.app.ChatSession;
 import com.thiendz.example.springsocket.model.UserProfile;
 
 import javax.websocket.Session;
@@ -16,6 +17,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class WsUtils {
+
+    public static <T> List<UserSession<T>> isOnePerConnect(Map<Session, UserSession<T>> sessions, UserSession<T> userSession) {
+        return sessions
+                .values()
+                .stream()
+                .filter(chatSessionUserSession ->
+                        chatSessionUserSession.getUserProfile().getUsername()
+                                .equals(userSession.getUserProfile().getUsername()))
+                .collect(Collectors.toList());
+    }
+
     public static <T> UserSession<T> onConnectParser(Session session) {
         Map<String, String> queryParams = URLUtil.parseQueryParam(session.getQueryString());
         JwtTokenProvider jwtTokenProvider = BeanUtil.getApplicationContext().getBean(JwtTokenProvider.class);
@@ -57,7 +69,6 @@ public class WsUtils {
     public static void sendMessage(List<Session> to, WsMessage<?> message) {
         to.forEach((session) -> sendMessage(session, message));
     }
-
 
 
     public static Session findSessionByUsername(Map<Session, UserSession<?>> sessions, String username) {
