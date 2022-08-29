@@ -162,6 +162,36 @@ public class WsChatService {
         int size = Integer.parseInt(BeanUtil.getProperties().get("chat.message.log.size-max").toString());
         WsChatService.roomChatHis.computeIfAbsent(roomId, k -> new LinkedListFixedSize<>(size));
     }
+
+    public static void closeAllInChatService(UserSession<?> userSession) {
+        RoomInfo roomInfoJoin = WsChatService.roomJoin.get(userSession.getSession());
+        if (roomInfoJoin == null)
+            return;
+        WsChatService.roomJoin.remove(userSession.getSession());
+        Optional<UserSession<?>> optionalUserProfile = WsChatService
+                .roomInfo
+                .get(roomInfoJoin.getId())
+                .getMembers()
+                .stream()
+                .filter(u -> u.getSession().equals(userSession.getSession()))
+                .findFirst();
+        if (!optionalUserProfile.isPresent())
+            return;
+        WsChatService
+                .roomInfo
+                .get(roomInfoJoin.getId())
+                .getMembers()
+                .remove(optionalUserProfile.get());
+
+        String username = userSession.getUserProfile().getUsername();
+        String strMessage = username + " đã rời nhóm";
+        WsMessage<Void> wsMessage = WsMessage.success(WsCommand.CHAT_OUT_ROOM, 2, strMessage);
+        WsChatService
+                .roomInfo
+                .get(roomInfoJoin.getId())
+                .getMembers()
+                .forEach(u -> WsUtils.sendMessage(u.getSession(), wsMessage));
+    }
 }
 
 

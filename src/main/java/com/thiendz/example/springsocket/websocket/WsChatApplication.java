@@ -5,6 +5,7 @@ import com.thiendz.example.springsocket.dto.enums.WsCommand;
 import com.thiendz.example.springsocket.dto.ws.UserSession;
 import com.thiendz.example.springsocket.dto.ws.WsMessage;
 import com.thiendz.example.springsocket.dto.ws.app.ChatSession;
+import com.thiendz.example.springsocket.services.ws.chat.WsChatService;
 import com.thiendz.example.springsocket.utils.WsUtils;
 
 import javax.websocket.*;
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @ServerEndpoint(value = "/websocket/chat")
 public class WsChatApplication {
     public static Map<Session, UserSession<ChatSession>> sessions = new ConcurrentHashMap<>();
+
     @OnOpen
     public void onOpen(Session session) {
         //kiểm tra authen
@@ -46,11 +48,13 @@ public class WsChatApplication {
 
     @OnClose
     public void onClose(Session session) {
+        WsChatService.closeAllInChatService(WsChatApplication.sessions.get(session));
         WsChatApplication.sessions.remove(session);
     }
 
     @OnError
     public void onError(Session session, Throwable throwable) {
+        WsChatService.closeAllInChatService(WsChatApplication.sessions.get(session));
         WsChatApplication.sessions.remove(session);
         throwable.printStackTrace();
     }
