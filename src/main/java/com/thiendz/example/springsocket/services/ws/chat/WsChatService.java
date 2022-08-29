@@ -4,14 +4,8 @@ import com.thiendz.example.springsocket.dto.enums.WsCommand;
 import com.thiendz.example.springsocket.dto.ws.UserSession;
 import com.thiendz.example.springsocket.dto.ws.WsMessage;
 import com.thiendz.example.springsocket.dto.ws.app.RoomInfo;
-import com.thiendz.example.springsocket.dto.ws.req.CreateRoomReq;
-import com.thiendz.example.springsocket.dto.ws.req.JoinRoomReq;
-import com.thiendz.example.springsocket.dto.ws.req.OutRoomReq;
-import com.thiendz.example.springsocket.dto.ws.req.RoomInfoReq;
-import com.thiendz.example.springsocket.dto.ws.res.CreateRoomRes;
-import com.thiendz.example.springsocket.dto.ws.res.JoinRoomRes;
-import com.thiendz.example.springsocket.dto.ws.res.OutRoomRes;
-import com.thiendz.example.springsocket.dto.ws.res.RoomInfoRes;
+import com.thiendz.example.springsocket.dto.ws.req.*;
+import com.thiendz.example.springsocket.dto.ws.res.*;
 import com.thiendz.example.springsocket.utils.NumberUtil;
 
 import javax.websocket.Session;
@@ -48,7 +42,7 @@ public class WsChatService {
 
         WsChatService.roomInfo.put(roomId, roomInfo);
         WsChatService.roomJoin.put(userSession.getSession(), roomInfo);
-        
+
         return WsMessage.success(WsCommand.CHAT_CREATE_ROOM, 1, "Tạo phòng thành công", new CreateRoomRes(roomId, roomInfo.getName()));
     }
 
@@ -125,7 +119,23 @@ public class WsChatService {
         return WsMessage.success(WsCommand.CHAT_OUT_ROOM, 1, "Rời phòng thành công", new OutRoomRes(WsChatService.roomInfo.get(outRoomReq.getRoomId())));
     }
 
+    public static WsMessage<ChatRes> chat(UserSession<?> userSession, ChatReq chatReq) {
+        if (chatReq == null)
+            return WsMessage.error(WsCommand.CHAT, -1, "Lỗi dữ liệu", ChatRes.class);
 
+        RoomInfo roomInfoJoin = WsChatService.roomJoin.get(userSession.getSession());
+        if (roomInfoJoin == null)
+            return WsMessage.error(WsCommand.CHAT, -2, "Chưa tham gia phòng chat nào", ChatRes.class);
+
+
+        ChatRes chatRes = new ChatRes();
+        chatRes.setId(chatReq.getId());
+        chatRes.setUser(userSession.getUserProfile().hideImportant());
+        chatRes.setMessage(chatReq.getMessage());
+        chatRes.setRoomInfo(WsChatService.roomInfo.get(roomInfoJoin.getId()));
+
+        return WsMessage.success(WsCommand.CHAT, 1, "Chat thành công", chatRes);
+    }
 }
 
 

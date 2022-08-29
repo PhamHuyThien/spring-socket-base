@@ -10,5 +10,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class ChatReq {
+    String id;
     String message;
 }

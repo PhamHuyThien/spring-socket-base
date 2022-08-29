@@ -6,10 +6,8 @@ import com.thiendz.example.springsocket.dto.ws.UserSession;
 import com.thiendz.example.springsocket.dto.ws.WsMessage;
 import com.thiendz.example.springsocket.dto.ws.app.ChatSession;
 import com.thiendz.example.springsocket.dto.ws.app.RoomInfo;
-import com.thiendz.example.springsocket.dto.ws.req.CreateRoomReq;
-import com.thiendz.example.springsocket.dto.ws.req.JoinRoomReq;
-import com.thiendz.example.springsocket.dto.ws.req.OutRoomReq;
-import com.thiendz.example.springsocket.dto.ws.req.RoomInfoReq;
+import com.thiendz.example.springsocket.dto.ws.req.*;
+import com.thiendz.example.springsocket.dto.ws.res.ChatRes;
 import com.thiendz.example.springsocket.dto.ws.res.JoinRoomRes;
 import com.thiendz.example.springsocket.dto.ws.res.OutRoomRes;
 import com.thiendz.example.springsocket.services.ws.chat.WsChatService;
@@ -68,6 +66,23 @@ public class WsChatController {
                 }
                 outRoomResWsMessage.setData(null);
                 WsUtils.sendMessage(session, outRoomResWsMessage);
+                break;
+            //{"cmd": "CHAT", "data": {"id": "123456", "message": "ahihi do ngok"}}
+            case CHAT:
+                WsMessage<ChatRes> chatResWsMessage = WsChatService.chat(userSession, message.dataCashTo(ChatReq.class));
+                if (!chatResWsMessage.isError()) {
+                    RoomInfo roomInfo = chatResWsMessage.getData().getRoomInfo();
+                    chatResWsMessage.getData().setRoomInfo(null);
+                    chatResWsMessage.setCode(2);
+                    roomInfo.getMembers().forEach(us -> WsUtils.sendMessage(us.getSession(), chatResWsMessage));
+                }
+                if (chatResWsMessage.getData() != null) {
+                    chatResWsMessage.getData().setRoomInfo(null);
+                    chatResWsMessage.getData().setUser(null);
+                    chatResWsMessage.getData().setMessage(null);
+                }
+                chatResWsMessage.setCode(1);
+                WsUtils.sendMessage(session, chatResWsMessage);
                 break;
             default:
                 WsUtils.sendMessage(session, message);

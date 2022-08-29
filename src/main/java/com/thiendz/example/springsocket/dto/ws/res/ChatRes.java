@@ -1,5 +1,6 @@
 package com.thiendz.example.springsocket.dto.ws.res;
 
+import com.thiendz.example.springsocket.dto.ws.app.RoomInfo;
 import com.thiendz.example.springsocket.model.UserProfile;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +12,8 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class ChatRes {
+    String id;
     UserProfile user;
     String message;
+    RoomInfo roomInfo;
 }

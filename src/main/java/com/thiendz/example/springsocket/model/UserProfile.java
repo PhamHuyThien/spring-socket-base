@@ -25,4 +25,14 @@ public class UserProfile {
     Long createAt;
     Long updateAt;
     Long deleteAt;
+
+    public UserProfile hideImportant() {
+        password = null;
+        role = null;
+        status = false;
+        createAt = null;
+        updateAt = null;
+        deleteAt = null;
+        return this;
+    }
 }
