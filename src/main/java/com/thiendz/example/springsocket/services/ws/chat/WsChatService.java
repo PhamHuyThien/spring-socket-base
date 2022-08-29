@@ -6,9 +6,11 @@ import com.thiendz.example.springsocket.dto.ws.WsMessage;
 import com.thiendz.example.springsocket.dto.ws.app.RoomInfo;
 import com.thiendz.example.springsocket.dto.ws.req.CreateRoomReq;
 import com.thiendz.example.springsocket.dto.ws.req.JoinRoomReq;
+import com.thiendz.example.springsocket.dto.ws.req.OutRoomReq;
 import com.thiendz.example.springsocket.dto.ws.req.RoomInfoReq;
 import com.thiendz.example.springsocket.dto.ws.res.CreateRoomRes;
 import com.thiendz.example.springsocket.dto.ws.res.JoinRoomRes;
+import com.thiendz.example.springsocket.dto.ws.res.OutRoomRes;
 import com.thiendz.example.springsocket.dto.ws.res.RoomInfoRes;
 import com.thiendz.example.springsocket.utils.NumberUtil;
 
@@ -88,6 +90,26 @@ public class WsChatService {
 
         WsChatService.roomInfo.get(joinRoomReq.getRoomId()).getMembers().add(userSession);
         return WsMessage.success(WsCommand.CHAT_JOIN_ROOM, 1, "Tham gia thành công", new JoinRoomRes(WsChatService.roomInfo.get(joinRoomReq.getRoomId())));
+    }
+
+    public static WsMessage<OutRoomRes> outRoom(UserSession<?> userSession, OutRoomReq outRoomReq) {
+        if (outRoomReq == null)
+            return WsMessage.error(WsCommand.CHAT_OUT_ROOM, -1, "Lỗi dữ liệu", OutRoomRes.class);
+
+        RoomInfo roomInfo = WsChatService.roomInfo.get(outRoomReq.getRoomId());
+        if (roomInfo == null)
+            return WsMessage.error(WsCommand.CHAT_OUT_ROOM, -2, "Room không tồn tại", OutRoomRes.class);
+
+        Optional<UserSession<?>> optionalUserProfile = roomInfo
+                .getMembers()
+                .stream()
+                .filter(u -> u.getSession().equals(userSession.getSession()))
+                .findFirst();
+        if (!optionalUserProfile.isPresent())
+            return WsMessage.error(WsCommand.CHAT_OUT_ROOM, -3, "Bạn không có trong phòng này", OutRoomRes.class);
+
+        WsChatService.roomInfo.get(outRoomReq.getRoomId()).getMembers().remove(optionalUserProfile.get());
+        return WsMessage.success(WsCommand.CHAT_OUT_ROOM, 1, "Rời phòng thành công", new OutRoomRes(WsChatService.roomInfo.get(outRoomReq.getRoomId())));
     }
 }
 

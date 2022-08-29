@@ -5,10 +5,13 @@ import com.thiendz.example.springsocket.dto.enums.WsCommand;
 import com.thiendz.example.springsocket.dto.ws.UserSession;
 import com.thiendz.example.springsocket.dto.ws.WsMessage;
 import com.thiendz.example.springsocket.dto.ws.app.ChatSession;
+import com.thiendz.example.springsocket.dto.ws.app.RoomInfo;
 import com.thiendz.example.springsocket.dto.ws.req.CreateRoomReq;
 import com.thiendz.example.springsocket.dto.ws.req.JoinRoomReq;
+import com.thiendz.example.springsocket.dto.ws.req.OutRoomReq;
 import com.thiendz.example.springsocket.dto.ws.req.RoomInfoReq;
 import com.thiendz.example.springsocket.dto.ws.res.JoinRoomRes;
+import com.thiendz.example.springsocket.dto.ws.res.OutRoomRes;
 import com.thiendz.example.springsocket.services.ws.chat.WsChatService;
 import com.thiendz.example.springsocket.utils.BeanUtil;
 import com.thiendz.example.springsocket.utils.WsUtils;
@@ -43,18 +46,28 @@ public class WsChatController {
             //{"cmd": "CHAT_JOIN_ROOM", "data": {"roomId": "123456", "password": null}}
             case CHAT_JOIN_ROOM:
                 WsMessage<JoinRoomRes> joinRoomResWsMessage = WsChatService.joinRoom(userSession, message.dataCashTo(JoinRoomReq.class));
-                if (joinRoomResWsMessage.isError()) {
-                    WsUtils.sendMessage(session, joinRoomResWsMessage);
-                    break;
+                if (!joinRoomResWsMessage.isError()) {
+                    String username = userSession.getUserProfile().getUsername();
+                    String strMessage = username + " đã tham gia nhóm";
+                    WsMessage<Void> wsMessage = WsMessage.success(WsCommand.CHAT_JOIN_ROOM, 2, strMessage);
+                    RoomInfo roomInfo = joinRoomResWsMessage.getData().getRoomInfo();
+                    roomInfo.getMembers().forEach(us -> WsUtils.sendMessage(us.getSession(), wsMessage));
                 }
-                String username = userSession.getUserProfile().getUsername();
-                String strMessage = username + " đã tham gia nhóm";
-                WsMessage<String> wsMessage = WsMessage.success(WsCommand.CHAT_CREATE_ROOM, 2, strMessage);
-                joinRoomResWsMessage
-                        .getData()
-                        .getRoomInfo()
-                        .getMembers()
-                        .forEach(us -> WsUtils.sendMessage(us.getSession(), wsMessage));
+                joinRoomResWsMessage.setData(null);
+                WsUtils.sendMessage(session, joinRoomResWsMessage);
+                break;
+            //{"cmd": "CHAT_OUT_ROOM", "data": {"roomId": "123456"}}
+            case CHAT_OUT_ROOM:
+                WsMessage<OutRoomRes> outRoomResWsMessage = WsChatService.outRoom(userSession, message.dataCashTo(OutRoomReq.class));
+                if (!outRoomResWsMessage.isError()) {
+                    String username = userSession.getUserProfile().getUsername();
+                    String strMessage = username + " đã rời nhóm";
+                    WsMessage<Void> wsMessage = WsMessage.success(WsCommand.CHAT_OUT_ROOM, 2, strMessage);
+                    RoomInfo roomInfo = outRoomResWsMessage.getData().getRoomInfo();
+                    roomInfo.getMembers().forEach(us -> WsUtils.sendMessage(us.getSession(), wsMessage));
+                }
+                outRoomResWsMessage.setData(null);
+                WsUtils.sendMessage(session, outRoomResWsMessage);
                 break;
             default:
                 WsUtils.sendMessage(session, message);

@@ -10,6 +10,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class JoinRoomRes {
+public class OutRoomRes {
     RoomInfo roomInfo;
 }

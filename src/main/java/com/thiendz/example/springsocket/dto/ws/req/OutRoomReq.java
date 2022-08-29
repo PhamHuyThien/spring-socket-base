@@ -1,6 +1,5 @@
-package com.thiendz.example.springsocket.dto.ws.res;
+package com.thiendz.example.springsocket.dto.ws.req;
 
-import com.thiendz.example.springsocket.dto.ws.app.RoomInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +9,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class JoinRoomRes {
-    RoomInfo roomInfo;
+public class OutRoomReq {
+    String roomId;
 }

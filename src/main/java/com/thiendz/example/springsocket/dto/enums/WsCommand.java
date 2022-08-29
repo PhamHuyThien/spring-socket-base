@@ -18,4 +18,5 @@ public enum WsCommand {
     CHAT_ROOM_INFO,
     CHAT_LIST_ROOM_INFO,
     CHAT_JOIN_ROOM,
+    CHAT_OUT_ROOM,
 }
