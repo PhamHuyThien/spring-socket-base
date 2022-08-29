@@ -74,14 +74,17 @@ public class WsChatService {
         if (roomInfo.getMembers().size() >= roomInfo.getLimit())
             return WsMessage.error(WsCommand.CHAT_JOIN_ROOM, -3, "Phòng đã đủ người", JoinRoomRes.class);
 
+        if (roomInfo.getPassword() != null && !roomInfo.getPassword().equals(joinRoomReq.getPassword()))
+            return WsMessage.error(WsCommand.CHAT_JOIN_ROOM, -4, "Mật khẩu phòng không chính xác", JoinRoomRes.class);
+
         if (Objects.equals(roomInfo.getMaster().getSession(), userSession.getSession()))
-            return WsMessage.error(WsCommand.CHAT_JOIN_ROOM, -4, "Bạn là chủ phòng, khong thể tham gia", JoinRoomRes.class);
+            return WsMessage.error(WsCommand.CHAT_JOIN_ROOM, -5, "Bạn là chủ phòng, khong thể tham gia", JoinRoomRes.class);
 
         boolean isJoinRoom = roomInfo.getMembers()
                 .stream()
                 .anyMatch(u -> u.getSession().equals(userSession.getSession()));
         if (isJoinRoom)
-            return WsMessage.error(WsCommand.CHAT_JOIN_ROOM, -5, "Bạn đã tham gia phòng này rồi", JoinRoomRes.class);
+            return WsMessage.error(WsCommand.CHAT_JOIN_ROOM, -6, "Bạn đã tham gia phòng này rồi", JoinRoomRes.class);
 
         WsChatService.roomInfo.get(joinRoomReq.getRoomId()).getMembers().add(userSession);
         return WsMessage.success(WsCommand.CHAT_JOIN_ROOM, 1, "Tham gia thành công", new JoinRoomRes(WsChatService.roomInfo.get(joinRoomReq.getRoomId())));

@@ -11,4 +11,5 @@ import lombok.ToString;
 @ToString
 public class JoinRoomReq {
     String roomId;
+    String password;
 }

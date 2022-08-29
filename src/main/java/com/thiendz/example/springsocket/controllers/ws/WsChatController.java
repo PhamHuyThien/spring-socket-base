@@ -28,7 +28,7 @@ public class WsChatController {
         }
 
         switch (message.getCmd()) {
-            //{"cmd": "CHAT_CREATE_ROOM", "data": {"name": "name1", "limit": 100, "password": "", "fee": 0}}
+            //{"cmd": "CHAT_CREATE_ROOM", "data": {"name": "name1", "limit": 100, "password": null, "fee": 0}}
             case CHAT_CREATE_ROOM:
                 WsUtils.sendMessage(session, WsChatService.createRoom(userSession, message.dataCashTo(CreateRoomReq.class)));
                 break;
@@ -40,7 +40,7 @@ public class WsChatController {
             case CHAT_LIST_ROOM_INFO:
                 WsUtils.sendMessage(session, WsChatService.roomInfo());
                 break;
-            //{"cmd": "CHAT_JOIN_ROOM", "data": {"roomId": "123456"}}
+            //{"cmd": "CHAT_JOIN_ROOM", "data": {"roomId": "123456", "password": null}}
             case CHAT_JOIN_ROOM:
                 WsMessage<JoinRoomRes> joinRoomResWsMessage = WsChatService.joinRoom(userSession, message.dataCashTo(JoinRoomReq.class));
                 if (joinRoomResWsMessage.isError()) {
