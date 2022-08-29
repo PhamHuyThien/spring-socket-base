@@ -49,6 +49,8 @@ public class WsChatController {
                     String strMessage = username + " đã tham gia nhóm";
                     WsMessage<Void> wsMessage = WsMessage.success(WsCommand.CHAT_JOIN_ROOM, 2, strMessage);
                     RoomInfo roomInfo = joinRoomResWsMessage.getData().getRoomInfo();
+                    WsChatService.sendOldMessageToNewMember(userSession, roomInfo.getId());
+                    WsChatService.roomChatHistoryAdd(roomInfo.getId(), joinRoomResWsMessage);
                     roomInfo.getMembers().forEach(us -> WsUtils.sendMessage(us.getSession(), wsMessage));
                 }
                 joinRoomResWsMessage.setData(null);
@@ -63,6 +65,7 @@ public class WsChatController {
                     WsMessage<Void> wsMessage = WsMessage.success(WsCommand.CHAT_OUT_ROOM, 2, strMessage);
                     RoomInfo roomInfo = outRoomResWsMessage.getData().getRoomInfo();
                     roomInfo.getMembers().forEach(us -> WsUtils.sendMessage(us.getSession(), wsMessage));
+                    WsChatService.roomChatHistoryAdd(roomInfo.getId(), outRoomResWsMessage);
                 }
                 outRoomResWsMessage.setData(null);
                 WsUtils.sendMessage(session, outRoomResWsMessage);
@@ -75,6 +78,7 @@ public class WsChatController {
                     chatResWsMessage.getData().setRoomInfo(null);
                     chatResWsMessage.setCode(2);
                     roomInfo.getMembers().forEach(us -> WsUtils.sendMessage(us.getSession(), chatResWsMessage));
+                    WsChatService.roomChatHistoryAdd(roomInfo.getId(), chatResWsMessage);
                 }
                 if (chatResWsMessage.getData() != null) {
                     chatResWsMessage.getData().setRoomInfo(null);

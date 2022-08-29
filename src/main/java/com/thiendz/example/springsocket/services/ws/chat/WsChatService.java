@@ -6,7 +6,10 @@ import com.thiendz.example.springsocket.dto.ws.WsMessage;
 import com.thiendz.example.springsocket.dto.ws.app.RoomInfo;
 import com.thiendz.example.springsocket.dto.ws.req.*;
 import com.thiendz.example.springsocket.dto.ws.res.*;
+import com.thiendz.example.springsocket.utils.BeanUtil;
+import com.thiendz.example.springsocket.utils.LinkedListFixedSize;
 import com.thiendz.example.springsocket.utils.NumberUtil;
+import com.thiendz.example.springsocket.utils.WsUtils;
 
 import javax.websocket.Session;
 import java.util.*;
@@ -16,6 +19,7 @@ import java.util.stream.Collectors;
 public class WsChatService {
     public static Map<String, RoomInfo> roomInfo = new ConcurrentHashMap<>();
     public static Map<Session, RoomInfo> roomJoin = new ConcurrentHashMap<>();
+    public static Map<String, LinkedListFixedSize<WsMessage<?>>> roomChatHis = new HashMap<>();
 
     public static WsMessage<CreateRoomRes> createRoom(UserSession<?> userSession, CreateRoomReq createRoomReq) {
         if (createRoomReq == null)
@@ -97,13 +101,22 @@ public class WsChatService {
         return WsMessage.success(WsCommand.CHAT_JOIN_ROOM, 1, "Tham gia thành công", new JoinRoomRes(WsChatService.roomInfo.get(joinRoomReq.getRoomId())));
     }
 
-    public static WsMessage<OutRoomRes> outRoom(UserSession<?> userSession, OutRoomReq outRoomReq) {
-        if (outRoomReq == null)
-            return WsMessage.error(WsCommand.CHAT_OUT_ROOM, -1, "Lỗi dữ liệu", OutRoomRes.class);
+    public static void sendOldMessageToNewMember(UserSession<?> userSession, String roomId) {
+        WsChatService.initRoomChatHistory(roomId);
+        WsChatService.roomChatHis.get(roomId).forEach(wsMessage -> WsUtils.sendMessage(userSession.getSession(), wsMessage));
+    }
 
-        RoomInfo roomInfo = WsChatService.roomInfo.get(outRoomReq.getRoomId());
+    public static WsMessage<OutRoomRes> outRoom(UserSession<?> userSession, OutRoomReq outRoomReq) {
+//        if (outRoomReq == null)
+//            return WsMessage.error(WsCommand.CHAT_OUT_ROOM, -1, "Lỗi dữ liệu", OutRoomRes.class);
+
+//        RoomInfo roomInfo = WsChatService.roomInfo.get(outRoomReq.getRoomId());
+//        if (roomInfo == null)
+//            return WsMessage.error(WsCommand.CHAT_OUT_ROOM, -2, "Room không tồn tại", OutRoomRes.class);
+
+        RoomInfo roomInfo = WsChatService.roomJoin.get(userSession.getSession());
         if (roomInfo == null)
-            return WsMessage.error(WsCommand.CHAT_OUT_ROOM, -2, "Room không tồn tại", OutRoomRes.class);
+            return WsMessage.error(WsCommand.CHAT_OUT_ROOM, -3, "Bạn không có trong phòng nào", OutRoomRes.class);
 
         Optional<UserSession<?>> optionalUserProfile = roomInfo
                 .getMembers()
@@ -113,10 +126,11 @@ public class WsChatService {
         if (!optionalUserProfile.isPresent())
             return WsMessage.error(WsCommand.CHAT_OUT_ROOM, -3, "Bạn không có trong phòng này", OutRoomRes.class);
 
-        WsChatService.roomInfo.get(outRoomReq.getRoomId()).getMembers().remove(optionalUserProfile.get());
+
+        WsChatService.roomInfo.get(roomInfo.getId()).getMembers().remove(optionalUserProfile.get());
         WsChatService.roomJoin.remove(userSession.getSession());
 
-        return WsMessage.success(WsCommand.CHAT_OUT_ROOM, 1, "Rời phòng thành công", new OutRoomRes(WsChatService.roomInfo.get(outRoomReq.getRoomId())));
+        return WsMessage.success(WsCommand.CHAT_OUT_ROOM, 1, "Rời phòng thành công", new OutRoomRes(WsChatService.roomInfo.get(roomInfo.getId())));
     }
 
     public static WsMessage<ChatRes> chat(UserSession<?> userSession, ChatReq chatReq) {
@@ -133,8 +147,20 @@ public class WsChatService {
         chatRes.setUser(userSession.getUserProfile().hideImportant());
         chatRes.setMessage(chatReq.getMessage());
         chatRes.setRoomInfo(WsChatService.roomInfo.get(roomInfoJoin.getId()));
+        chatRes.setCreateAt(new Date().getTime());
 
         return WsMessage.success(WsCommand.CHAT, 1, "Chat thành công", chatRes);
+    }
+
+
+    public static void roomChatHistoryAdd(String roomId, WsMessage<?> wsMessage) {
+        WsChatService.initRoomChatHistory(roomId);
+        WsChatService.roomChatHis.get(roomId).add(wsMessage);
+    }
+
+    public static void initRoomChatHistory(String roomId) {
+        int size = Integer.parseInt(BeanUtil.getProperties().get("chat.message.log.size-max").toString());
+        WsChatService.roomChatHis.computeIfAbsent(roomId, k -> new LinkedListFixedSize<>(size));
     }
 }
 
